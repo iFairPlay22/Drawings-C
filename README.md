@@ -1,2 +1,5 @@
 # Drawings
-Projet réalisé en C.
+```
+make
+./monprogramme
+```
