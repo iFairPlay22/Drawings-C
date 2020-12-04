@@ -3,8 +3,8 @@
 #include <stdlib.h>
 #include <string.h>
 
-#define MALLOC_DR_LIMIT 10
-#define MALLOC_PO_LIMIT 5
+#define MAX_SQUARES 20
+#define MAX_POLYGON_NODES 20
 
 // ############################################### //
 // ################## FUNCTIONS ################## //
@@ -63,7 +63,6 @@ void freePolygon(Shape shape);
 void freePolygon2(Polygon *polygon);
 void startPolygon(Drawing *drawing);
 void addPoint(Drawing *drawing, int x, int y);
-void mallocPolygonNodes(Polygon *polygon, int newSize);
 void displayPolygon(Drawing *drawing, Shape shape);
 void displayPolygonAsSvg(Drawing *drawing, Shape shape);
 
@@ -184,13 +183,12 @@ void freeShape(Shape **shape)
 /*		  		     	 		  	 
     Modifie la taille mémoire de drawing->shapes 
     dans un intervalle le plus petit intervalle
-    [ 0, k * MALLOC_DR_LIMIT ] comprenant newSize 
+    [ 0, k * MAX_SQUARES ] comprenant newSize 
 */
 void mallocShapes(Drawing *drawing, int newSize)
 {
-    int nbMallocs = (newSize / MALLOC_DR_LIMIT) + 1;
-    // printf("mallocShapes() => [0, %d]\n\n", nbMallocs * MALLOC_DR_LIMIT - 1);
-    Shape **newShapes = (Shape **)malloc(nbMallocs * MALLOC_DR_LIMIT * sizeof(Shape *));
+    int nbMallocs = (newSize / MAX_SQUARES) + 1;
+    Shape **newShapes = (Shape **)malloc(nbMallocs * MAX_SQUARES * sizeof(Shape *));
 
     // Copy
     for (int i = 0; i < drawing->size; i++)
@@ -212,8 +210,8 @@ Shape *addEmptyShape(Drawing *drawing, int x, int y)
         freeMalformedPolygon(drawing);
 
     // If malloc limit is reached
-    if (drawing->size != 0 && drawing->size % MALLOC_DR_LIMIT == 0)
-        mallocShapes(drawing, drawing->size);
+    if (drawing->size % MAX_SQUARES == 0)
+        mallocShapes(drawing, drawing->size + MAX_SQUARES);
 
     // Add Shape
     Shape *shape = createShape(drawing->color, x, y);
@@ -665,7 +663,7 @@ Polygon *createPolygon()
 {
 
     Polygon *polygon = (Polygon *)malloc(sizeof(Polygon));
-    polygon->nodes = (PolygonNode **)malloc(MALLOC_PO_LIMIT * sizeof(PolygonNode *));
+    polygon->nodes = (PolygonNode **)malloc(MAX_POLYGON_NODES * sizeof(PolygonNode *));
     polygon->size = 0;
 
     return polygon;
@@ -691,8 +689,7 @@ void readPolygon(Shape *shape, FILE *f)
 
     fread(&(polygon->size), sizeof(int), 1, f);
 
-    if (MALLOC_PO_LIMIT < polygon->size)
-        mallocPolygonNodes(polygon, polygon->size);
+    polygon->nodes = malloc(MAX_POLYGON_NODES * sizeof(PolygonNode));
 
     for (int i = 0; i < polygon->size; i++)
         polygon->nodes[i] = readPolygonNode(shape, f);
@@ -753,21 +750,22 @@ void addPoint(Drawing *drawing, int x, int y)
     if (drawing == NULL)
         return;
 
-    PolygonManager *polygonManager = drawing->polygonManager;
-    Polygon *polygon = polygonManager->currentPolygon;
-
-    if (polygon == NULL)
+    if (drawing->polygonManager->currentPolygon == NULL)
     {
         printf("Error : no polygon started\n");
         return;
     }
 
-    if (polygon->size != 0 && polygon->size % MALLOC_PO_LIMIT == 0)
-        mallocPolygonNodes(
-            polygon,
-            polygon->size);
+    if (drawing->size == MAX_POLYGON_NODES)
+    {
+        printf("MAX_POLYGON_NODES reached...\n");
+        return;
+    }
+
+    PolygonManager *polygonManager = drawing->polygonManager;
 
     // Add PolygonNode
+    Polygon *polygon = polygonManager->currentPolygon;
     polygon->nodes[polygon->size] = createPolygonNode(x, y);
     polygon->size++;
 
@@ -794,25 +792,6 @@ void addPoint(Drawing *drawing, int x, int y)
         polygonManager->lastPolygonShape->type = 4;
         polygonManager->lastPolygonShape = NULL;
     }
-}
-
-/*		  		     	 		  	 
-    Modifie la taille mémoire de polygon->nodes
-    dans un intervalle le plus petit possible :
-    [ 0, k * MALLOC_PO_LIMIT ] comprenant newSize 
-*/
-void mallocPolygonNodes(Polygon *polygon, int newSize)
-{
-    int nbMallocs = (newSize / MALLOC_PO_LIMIT) + 1;
-    // printf("mallocPolygonNodes() => [0, %d]\n\n", nbMallocs * MALLOC_PO_LIMIT - 1);
-    PolygonNode **newNodes = (PolygonNode **)malloc(nbMallocs * MALLOC_PO_LIMIT * sizeof(PolygonNode *));
-
-    // Copy
-    for (int i = 0; i < polygon->size; i++)
-        newNodes[i] = polygon->nodes[i];
-
-    free(polygon->nodes);
-    polygon->nodes = newNodes;
 }
 
 /*		  		     	 		  	 
@@ -960,7 +939,7 @@ Drawing *createDrawing()
 {
     Drawing *drawing = (Drawing *)malloc(sizeof(Drawing));
 
-    drawing->shapes = (Shape **)malloc(MALLOC_DR_LIMIT * sizeof(Shape *));
+    drawing->shapes = (Shape **)malloc(MAX_SQUARES * sizeof(Shape *));
     drawing->polygonManager = createPolygonManager();
     drawing->size = 0;
     drawing->offsetX = 0;
@@ -1249,7 +1228,7 @@ Drawing *readDrawing(char *filename)
     fread(&(drawing->offsetX), sizeof(int), 1, f);
     fread(&(drawing->offsetY), sizeof(int), 1, f);
 
-    if (MALLOC_DR_LIMIT < drawing->size)
+    if (MAX_SQUARES < drawing->size)
         mallocShapes(drawing, drawing->size);
 
     // Store the shapes

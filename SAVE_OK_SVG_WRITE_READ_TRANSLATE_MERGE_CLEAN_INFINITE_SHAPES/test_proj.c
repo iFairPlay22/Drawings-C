@@ -57,20 +57,14 @@ Drawing *createD2()
     return d2;
 }
 
-Drawing *createD3(int nbPolygons, int nbPolygonsNodes)
+Drawing *createD3(int nbElements)
 {
     Drawing *d3 = createDrawing();
 
     // AJOUTER LES ELEMENTS
 
-    for (int i = 0; i < nbPolygons; i++)
-    {
-        startPolygon(d3);
-        for (int j = 0; j < nbPolygonsNodes; j++)
-        {
-            addPoint(d3, i, j);
-        }
-    }
+    for (int i = 0; i < nbElements; i++)
+        addRectangle(d3, 20, 25, 10, 5);
 
     return d3;
 }
@@ -98,7 +92,7 @@ int main(int argc, char const *argv[])
 {
     Drawing *d1 = createD1();
     Drawing *d2 = createD2();
-    Drawing *d3 = createD3(28, 25);
+    Drawing *d3 = createD3(256);
 
     translateDrawing(d2, 10, -10);
 
@@ -106,16 +100,14 @@ int main(int argc, char const *argv[])
 
     // Write & Read & Print
     writeDrawing(d3, "drawing.bin");
-    printf("READ\n");
     Drawing *d4 = readDrawing("drawing.bin");
-    printf("\n\nD4 :\n\n");
-    displayDrawing(d4);
-    // freeDrawing(&d4);
+    displayDrawingAsSvg(d4);
+    freeDrawing(&d4);
 
     // Merge & Print
-    // d4 = mergeDrawings(d2, d3);
-    // displayDrawingAsSvg(d4);
-    // freeDrawing(&d4);
+    d4 = mergeDrawings(d2, d3);
+    displayDrawingAsSvg(d4);
+    freeDrawing(&d4);
 
     freeD123(d1, d2, d3);
 
