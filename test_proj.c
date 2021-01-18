@@ -8,28 +8,19 @@ Drawing *createD1()
 
     // AJOUTER LES ELEMENTS
 
-    addRectangle(d1, 20, 25, 10, 5);
-
-    setColor(d1, BLUE);
-
-    addCircle(d1, 50, 75, 10);
-
-    addSegment(d1, 10, 15, 20, 35);
-    addSegment(d1, 50, 53, 5, 8);
-
-    addText(d1, 70, 20, "Hello !");
-
-    addSegment(d1, 10, 15, 20, 35);
-    addSegment(d1, 50, 53, 5, 8);
-
+    setColor(d1, GREEN);
+    addRectangle(d1, 250, 50, 100, 200);
+    setColor(d1, BLACK);
+    addCircle(d1, 250, 50, 25);
+    addSegment(d1, 350, 50, 250, 250);
     setColor(d1, RED);
-
     startPolygon(d1);
-    addPoint(d1, 10, 50);
-    addPoint(d1, 20, 30);
-    addPoint(d1, 25, 35);
-
-    addSegment(d1, 10, 15, 20, 35);
+    addPoint(d1, 350, 250);
+    addPoint(d1, 450, 250);
+    addPoint(d1, 400, 300);
+    setColor(d1, BLUE);
+    addText(d1, 400, 300, "Test !");
+    exportSVG(d1, "test.svg");
 
     return d1;
 }
@@ -110,12 +101,12 @@ int main(int argc, char const *argv[])
     Drawing *d4 = readDrawing("drawing.bin");
     printf("\n\nD4 :\n\n");
     displayDrawing(d4);
-    // freeDrawing(&d4);
+    freeDrawing(&d4);
 
-    // Merge & Print
-    // d4 = mergeDrawings(d2, d3);
-    // displayDrawingAsSvg(d4);
-    // freeDrawing(&d4);
+    // Concat & Print
+    d4 = concatDrawings(d2, d3);
+    exportSVG(d1, "test.svg");
+    freeDrawing(&d4);
 
     freeD123(d1, d2, d3);
 

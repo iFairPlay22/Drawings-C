@@ -159,7 +159,7 @@ void displayDrawing(Drawing *d);
 /*		  		     	 		  	 
     Affiche un Polygon en format SVG		  		     	 		  	 
 */
-void displayDrawingAsSvg(Drawing *drawing);
+void exportSVG(Drawing *drawing, char *filename);
 
 /*		  		     	 		  	 
     Ajoute un rectangle au Drawing,		  		     	 		  	 
@@ -207,13 +207,13 @@ void addPoint(Drawing *d, int x, int y);
 */
 void removeElement(Drawing *d, int i);
 
-/*
-    Sauvegarde le fichier sous forme binaire
+/*		  		     	 		  	 
+    Sauvegarde le fichier sous forme binaire		  		     	 		  	 
 */
 void writeDrawing(Drawing *d, char *filename);
 
-/*
-    Lit le fichier sous forme binaire et le renvoie
+/*		  		     	 		  	 
+    Lit le fichier sous forme binaire et le renvoie		  		     	 		  	 
 */
 Drawing *readDrawing(char *filename);
 
@@ -222,9 +222,14 @@ Drawing *readDrawing(char *filename);
 */
 void translateDrawing(Drawing *d, int dx, int dy);
 
-/*
-    Fusionne deux dessins
+/*		  		     	 		  	 
+    Fusionne deux dessins		  		     	 		  	 
 */
-Drawing *mergeDrawings(Drawing *d1, Drawing *d2);
+Drawing *concatDrawings(Drawing *d1, Drawing *d2);
+
+/*		  		     	 		  	 
+    Eregistre le dessin au format SVG dans le fichier dont le nom est passé en paramètre.		  		     	 		  	 
+*/
+void exportSVG(Drawing *d, char *filename);
 
 #endif
